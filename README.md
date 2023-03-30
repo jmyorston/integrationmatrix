@@ -6,7 +6,12 @@ A simple R script to output a csv file of Codat's supported datatypes by account
 Download and install R and RStudio [from here](https://posit.co/download/rstudio-desktop/)
 
 ### Clone the repository into R Studio
-Open R studio and select file, new project and import the repo using the https link
+Open R studio and select 
+1. "File" from the menu
+1. "New Project..." 
+1. "Version Control" then "Git"
+
+and import the repo using the https link
 ```
 https://github.com/jmyorston/integrationmatrix.git
 ```

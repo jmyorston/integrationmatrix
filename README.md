@@ -1,4 +1,4 @@
-# integration matrix
+# Integration Matrix
 A simple R script to output a csv file of Codat's supported datatypes by accounting integration.
 
 # Set Up

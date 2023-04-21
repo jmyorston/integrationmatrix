@@ -27,4 +27,4 @@ jobs:
       env:
         APIKEY: ${{ secrets.APIKEY }}
       run: |
-        Rscript -e "Sys.setenv(APIKEY = '${{ env.APIKEY }}'); source('path/to/your/script.R')"
+        Rscript -e "Sys.setenv(APIKEY = '${{ env.APIKEY }}'); source('matrix.R')"

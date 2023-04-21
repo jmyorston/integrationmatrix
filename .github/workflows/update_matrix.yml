@@ -41,6 +41,9 @@ jobs:
 
     - name: List installed packages
       run: Rscript -e 'cat(installed.packages()[,c("Package", "LibPath")], sep = "\n")'
+      
+    - name: List content of Library directory
+      run: ls -l /home/runner/work/_temp/Library
 
     - name: Run R script with secret variable
       env:

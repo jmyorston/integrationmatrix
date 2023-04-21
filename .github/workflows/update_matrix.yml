@@ -39,6 +39,8 @@ jobs:
         install.packages(pkgs[!pkgs %in% installed.packages()[, "Package"]], repos = "https://cloud.r-project.org")
         cat(installed.packages()[,c("Package", "LibPath")], sep = "\n")'
 
+    - name: List installed packages
+      run: Rscript -e 'cat(installed.packages()[,c("Package", "LibPath")], sep = "\n")'
 
     - name: Run R script with secret variable
       env:

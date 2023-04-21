@@ -4,7 +4,7 @@ print(search())
 
 # Load packages -----------------------------------------------------------
 library(httr)
-library(tidyverse)
+#library(tidyverse)
 library(tidyjson)
 library(foreach)
 library(doParallel)

@@ -7,9 +7,9 @@ library(doParallel)
 
 startTime <- Sys.time()
 
+authKey <- Sys.getenv("APIKEY")
+
 # Auth Details ------------------------------------------------------------
-authKey <-
-  "Basic xxx"
 headers <-
   c("authorization" = authKey, "accept" = "application/json")
 

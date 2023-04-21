@@ -1,0 +1,32 @@
+name: Run R script daily
+
+on:
+  schedule:
+    - cron: '0 0 * * *' 
+
+jobs:
+  run_r_script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+
+    - name: Set up R environment
+      uses: r-lib/actions/setup-r@v1
+
+    - name: Install R dependencies
+      run: |
+        install.packages("remotes")
+        install.packages("httr")
+        install.packages("tidyverse")
+        install.packages("tidyjson")
+        install.packages("foreach")
+        install.packages("doParallel")
+        remotes::install_deps(dependencies = TRUE)
+
+    - name: Run R script with secret variable
+      env:
+        APIKEY: ${{ secrets.APIKEY }}
+      run: |
+        Rscript -e "Sys.setenv(APIKEY = '${{ env.APIKEY }}'); source('matrix.R')"

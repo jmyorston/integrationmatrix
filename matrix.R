@@ -1,3 +1,7 @@
+.libPaths()
+print(.libPaths())
+print(search())
+
 # Load packages -----------------------------------------------------------
 library(httr)
 library(tidyverse)

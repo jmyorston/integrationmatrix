@@ -1,0 +1,16 @@
+Package: Integration Matrix
+Title: Generates Codat supported datatype matrix
+Version: 0.1.0
+Authors@R: 
+    person("James", "Yorston", email = "j.yorston@codat.io")
+Description: A simple way to get a tabular output of Codat datatype support.
+Encoding: UTF-8
+LazyData: true
+License: MIT + file LICENSE
+Imports: 
+    httr,
+    tidyverse,
+    tidyjson,
+    foreach,
+    doParallel
+

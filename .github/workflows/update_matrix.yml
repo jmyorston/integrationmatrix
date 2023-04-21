@@ -1,79 +1,30 @@
-name: Run R script daily
+name: Update Matrix
 
 on:
   schedule:
-    - cron: "0 * * * *"
-  workflow_dispatch:
+    - cron: '0 0 * * *' # This will run the action every day at midnight (UTC)
+  workflow_dispatch: # This line allows you to trigger the workflow manually
 
 jobs:
-  generate-data:
-    runs-on: ${{ matrix.config.os }}
-
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
-
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - {os: ubuntu-latest,   r: 'release'}
-
-    env:
-      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
-      RSPM: ${{ matrix.config.rspm }}
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+  run_r_script:
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+    - name: Check out repository
+      uses: actions/checkout@v2
 
-      - uses: r-lib/actions/setup-r@v2
-        with:
-          r-version: ${{ matrix.config.r }}
-          http-user-agent: ${{ matrix.config.http-user-agent }}
+    - name: Set up R environment
+      uses: r-lib/actions/setup-r@v2
+      with:
+        r-version: 4.1.1  # Replace this with a supported R version
 
-      - name: Query dependencies
-        run: |
-          install.packages('remotes')
-          install.packages('sessioninfo')
-          install.packages('remotes')
-          install.packages('httr')
-          install.packages('tidyverse')
-          install.packages('tidyjson')
-          install.packages('foreach')
-          install.packages('doParallel')
-          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
-          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
-        shell: Rscript {0}
+    - name: Install R dependencies
+      run: |
+        R -e 'install.packages("remotes")'
+        R -e 'remotes::install_deps(dependencies = TRUE)'
 
-      - name: Cache R packages
-        uses: actions/cache@v1
-        with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
-          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
-
-      - name: Install dependencies
-        run: |
-          remotes::install_deps(dependencies = TRUE)
-        shell: Rscript {0}
-          
-      - name: Generate data
-        env:
-          APIKEY: ${{ secrets.APIKEY }}
-        run: |
-          Rscript -e "Sys.setenv(APIKEY = '${{ env.APIKEY }}'); source('matrix.R')"
-        shell: Rscript {0} 
-        
-      - name: Commit files
-        run: |
-          git config --local user.email "jmyorston@codat.io"
-          git config --local user.name "matrix update"
-          git add --all
-          git commit -am "add data"
-          git push 
-
-      - name: Session info
-        run: |
-          options(width = 100)
-          pkgs <- installed.packages()[, "Package"]
-          sessioninfo::session_info(pkgs, include_base = TRUE)
-        shell: Rscript {0}
+    - name: Run R script with secret variable
+      env:
+        APIKEY: ${{ secrets.APIKEY }}
+      run: |
+        Rscript -e "Sys.setenv(APIKEY = '${{ env.APIKEY }}'); source('path/to/your/script.R')"

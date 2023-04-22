@@ -1,7 +1,3 @@
-.libPaths()
-print(.libPaths())
-print(search())
-
 # Load packages -----------------------------------------------------------
 library(httr)
 #library(tidyverse)
@@ -10,8 +6,6 @@ library(tidyr)
 library(foreach)
 library(doParallel)
 library(dplyr)
-
-startTime <- Sys.time()
 
 authKey <- Sys.getenv("APIKEY")
 
@@ -65,10 +59,3 @@ integrationMatrix <- integrations_df  %>% mutate(
   pivot_wider(names_from = Platform, values_from = Status2)
 
 write.csv(integrationMatrix,"integrationMatrix.csv")
-
-endTime <- Sys.time()
-
-timeTaken <- round(endTime - startTime,2)
-
-timeTaken
-

@@ -9,6 +9,7 @@ library(tidyjson)
 library(tidyr)
 library(foreach)
 library(doParallel)
+library(dplyr)
 
 startTime <- Sys.time()
 

@@ -12,5 +12,6 @@ Imports:
     tidyr,
     tidyjson,
     foreach,
-    doParallel
+    doParallel,
+    dplyr
 

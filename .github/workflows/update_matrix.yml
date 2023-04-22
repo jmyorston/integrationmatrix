@@ -12,6 +12,8 @@ jobs:
     steps:
     - name: Check out repository
       uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.GITHUB }}
 
     - name: Set up R environment
       uses: r-lib/actions/setup-r@v2
@@ -51,13 +53,10 @@ jobs:
       run: |
         Rscript -e "Sys.setenv(APIKEY = '${{ env.APIKEY }}'); source('matrix.R')"
 
-    - name: Configure Git and set remote
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB }}
+    - name: Commit and push changes
       run: |
         git config --local user.email "actions@github.com"
         git config --local user.name "GitHub Action"
-        git remote set-url origin https://x-access-token:${{ secrets.GITHUB }}@github.com/jmyorston/integrationmatrix.git
         git add --all
         git diff-index --quiet HEAD || git commit -m "Update data"
         git push

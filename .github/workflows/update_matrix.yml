@@ -50,3 +50,11 @@ jobs:
         APIKEY: ${{ secrets.APIKEY }}
       run: |
         Rscript -e "Sys.setenv(APIKEY = '${{ env.APIKEY }}'); source('matrix.R')"
+
+        - name: Commit and push files
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Action"
+          git add --all
+          git diff-index --quiet HEAD || git commit -m "Update data"
+          git push

@@ -9,7 +9,7 @@ LazyData: true
 License: MIT + file LICENSE
 Imports: 
     httr,
-    tidyverse,
+    tidyr,
     tidyjson,
     foreach,
     doParallel

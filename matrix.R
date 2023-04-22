@@ -6,6 +6,7 @@ print(search())
 library(httr)
 #library(tidyverse)
 library(tidyjson)
+library(tidyr)
 library(foreach)
 library(doParallel)
 

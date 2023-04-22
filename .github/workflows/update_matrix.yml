@@ -51,12 +51,13 @@ jobs:
       run: |
         Rscript -e "Sys.setenv(APIKEY = '${{ env.APIKEY }}'); source('matrix.R')"
 
-    - name: Commit and push files
+    - name: Configure Git and set remote
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config --local user.email "actions@github.com"
         git config --local user.name "GitHub Action"
+        git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/jmyorston/integrationmatrix.git
         git add --all
         git diff-index --quiet HEAD || git commit -m "Update data"
         git push
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

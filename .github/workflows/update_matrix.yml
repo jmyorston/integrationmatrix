@@ -37,7 +37,7 @@ jobs:
         Rscript -e 'if (!dir.exists(Sys.getenv("R_LIBS_USER"))) {
           dir.create(Sys.getenv("R_LIBS_USER"), recursive = TRUE)
         }
-        pkgs <- c("tidyr","httr", "tidyjson", "foreach", "doParallel", "dplyr")
+        pkgs <- c("tidyr","httr", "dplyr")
         install.packages(pkgs[!pkgs %in% installed.packages()[, "Package"]], repos = "https://cloud.r-project.org")
         cat(installed.packages()[,c("Package", "LibPath")], sep = "\n")'
 

@@ -10,8 +10,5 @@ License: MIT + file LICENSE
 Imports: 
     httr,
     tidyr,
-    tidyjson,
-    foreach,
-    doParallel,
     dplyr
 

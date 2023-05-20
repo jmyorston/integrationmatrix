@@ -1,11 +1,8 @@
 # Load packages -----------------------------------------------------------
 library(httr)
-#library(tidyverse)
-library(tidyjson)
 library(tidyr)
-library(foreach)
-library(doParallel)
 library(dplyr)
+
 
 authKey <- Sys.getenv("APIKEY")
 
@@ -14,7 +11,7 @@ headers <-
   c("authorization" = authKey, "accept" = "application/json")
 
 
-# GET Journals ------------------------------------------------------------
+# GET Integrations ------------------------------------------------------------
 getIntegrations <-  GET(
   paste(
     "https://api.codat.io/integrations?useDefaultKeys=false&page=1&pageSize=5000"
@@ -23,39 +20,67 @@ getIntegrations <-  GET(
 )
 integrations <- content(getIntegrations, as = 'parsed')[["results"]]
 
-# Set up parallel backend
-num_cores <- detectCores() - 1
-registerDoParallel(cores = num_cores)
-
 # Process integrations using parallel execution
-integrations_df <- foreach(result = integrations, .combine = bind_rows) %dopar% {
-  if (result[["sourceType"]] == "Accounting") {
-    lapply(result[["datatypeFeatures"]], function(dtf) {
-      lapply(dtf[["supportedFeatures"]], function(sf) {
-        data.frame(Platform = result[["name"]],
-                   DataType = ifelse(is.na(dtf[["datatype"]]), "N/A", dtf[["datatype"]]),
-                   HTTP = ifelse(is.na(sf[["featureType"]]), "N/A", sf[["featureType"]]),
-                   Status = ifelse(is.na(sf[["featureState"]]), "N/A", sf[["featureState"]]))
+getIntegrations <-  GET("https://api.codat.io/integrations?useDefaultKeys=false&page=1&pageSize=5000", add_headers(headers))
+integrations <- content(getIntegrations, as = 'parsed')[["results"]]
+
+# Helper function to process each element
+process_element <- function(result, sourceType) {
+  tryCatch({
+    if (result[["sourceType"]] == sourceType) {
+      dtf_list <- lapply(result[["datatypeFeatures"]], function(dtf) {
+        sf_list <- lapply(dtf[["supportedFeatures"]], function(sf) {
+          data.frame(
+            Platform = result[["name"]],
+            DataType = ifelse(is.na(dtf[["datatype"]]), "N/A", dtf[["datatype"]]),
+            HTTP = ifelse(is.na(sf[["featureType"]]), "N/A", sf[["featureType"]]),
+            Status = ifelse(is.na(sf[["featureState"]]), "N/A", sf[["featureState"]])
+          )
+        })
+        do.call(rbind, sf_list)
       })
-    }) %>% bind_rows()
-  }
+      do.call(rbind, dtf_list)
+    } else {
+      NULL
+    }
+  }, error = function(e) {
+    print(paste0("Error in processing ", sourceType, ": ", e))
+    NULL
+  })
 }
 
-names(integrations_df)[1] <- "Platform"
-names(integrations_df)[2] <- "DataType"
-names(integrations_df)[3] <- "HTTP"
-names(integrations_df)[4] <- "Status"
+# Apply helper function to integrations list
+integrations_df_accounting <- do.call(rbind, lapply(integrations, process_element, sourceType = "Accounting"))
+integrations_df_commerce <- do.call(rbind, lapply(integrations, process_element, sourceType = "Commerce"))
 
-integrationMatrix <- integrations_df  %>% mutate(
-  Status2 = case_when(
-    Status == "Release" ~ TRUE,
-    Status == "Beta" ~ TRUE,
-    Status == "Alpha" ~ TRUE,
-    Status == "NotImplemented" ~ FALSE,
-    Status == "NA" ~ FALSE,
-    TRUE ~ FALSE,
-  )
-) %>% select(DataType, HTTP, Platform, Status2) %>%
-  pivot_wider(names_from = Platform, values_from = Status2)
 
-write.csv(integrationMatrix,"integrationMatrix.csv")
+# helper function to reformat the dataframe
+format_dataframe <- function(df) {
+  names(df)[1] <- "Platform"
+  names(df)[2] <- "DataType"
+  names(df)[3] <- "HTTP"
+  names(df)[4] <- "Status"
+  
+  df <- df %>% mutate(
+    Status2 = case_when(
+      Status == "Release" ~ TRUE,
+      Status == "Beta" ~ TRUE,
+      Status == "Alpha" ~ TRUE,
+      Status == "NotImplemented" ~ FALSE,
+      Status == "NA" ~ FALSE,
+      TRUE ~ FALSE
+    )
+  ) %>% select(DataType, HTTP, Platform, Status2) %>%
+    pivot_wider(names_from = Platform, values_from = Status2)
+  
+  return(df)
+}
+
+# reformat the dataframes
+integrations_df_commerce <- format_dataframe(integrations_df_commerce)
+integrations_df_accounting <- format_dataframe(integrations_df_accounting)
+
+
+write.csv(integrations_df_commerce,"commerceIntegrationMatrix.csv")
+write.csv(integrations_df_accounting,"accountingIntegrationMatrix.csv")
+
